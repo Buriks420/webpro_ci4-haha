@@ -1,0 +1,1 @@
+INSERT INTO tbl_admin (id_admin, nama_admin, username_admin, password_admin, akses_level, is_delete_admin, created_at, updated_at) VALUES ('ADM000', 'Developer', 'developer', '$2y$10$BtHHWFXmLuhnP79ievN58O8EivCDmojcmNDivaVhmIlBQNSIqr9Ku', '1', '0', '2024-07-18 16:11:01', '2024-07-18 16:11:01');
