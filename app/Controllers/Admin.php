@@ -1514,6 +1514,18 @@ class Admin extends BaseController
     echo view('Backend/Template/footer', $data);
     }
 
+    public function cetak_laporan_peminjaman()
+    {
+        $modelPeminjaman = new M_Peminjaman;
+
+        $dataPeminjaman = $modelPeminjaman->getDataPeminjamanJoin()->getResultArray();
+
+        $data['web_title'] = "Cetak Laporan Peminjaman";
+        $data['dataPeminjaman'] = $dataPeminjaman;
+
+        echo view('Backend/Transaksi/cetak-laporan-peminjaman', $data);
+    }
+
     public function pengembalian_buku()
 {
     $modelPeminjaman = new M_Peminjaman;
