@@ -1234,7 +1234,10 @@ class Admin extends BaseController
             'id_anggota' => $idAnggota
         ])->getRowArray();
 
-
+        if (empty($dataAnggota)) {
+            session()->setFlashdata('error', 'ID Anggota tidak valid atau tidak ditemukan!');
+            return redirect()->to(base_url('admin/peminjaman-step-1'));
+        }
         $dataBuku = $modelBuku->getDataBukuJoin()->getResultArray();
 
         $jumlahTemp = $modelPeminjaman->getDataTemp([
@@ -1494,5 +1497,106 @@ class Admin extends BaseController
     echo view('Backend/Template/footer',$data);
     }
 
+    public function laporan_peminjaman()
+{
+    $modelPeminjaman = new M_Peminjaman;
 
+    $uri = service('uri');
+    $page = $uri->getSegment(2);
+
+    $dataPeminjaman = $modelPeminjaman->getDataPeminjamanJoin()->getResultArray();
+
+    $data['page'] = $page;
+    $data['web_title'] = "Laporan Peminjaman";
+    $data['dataPeminjaman'] = $dataPeminjaman;
+
+    echo view('Backend/Template/header', $data);
+    echo view('Backend/Template/sidebar', $data);
+    echo view('Backend/Transaksi/laporan-peminjaman', $data);
+    echo view('Backend/Template/footer', $data);
+    }
+
+    public function pengembalian_buku()
+{
+    $modelPeminjaman = new M_Peminjaman;
+
+    $uri = service('uri');
+    $page = $uri->getSegment(2);
+
+    $dataPeminjaman = $modelPeminjaman->getDataPeminjamanJoin([
+        'tbl_peminjaman.status_transaksi' => "Berjalan"
+    ])->getResultArray();
+
+    $data['page'] = $page;
+    $data['web_title'] = "Pengembalian Buku";
+    $data['dataPeminjaman'] = $dataPeminjaman;
+
+    echo view('Backend/Template/header', $data);
+    echo view('Backend/Template/sidebar', $data);
+    echo view('Backend/Transaksi/pengembalian-buku', $data);
+    echo view('Backend/Template/footer', $data);
+    }
+
+    public function proses_pengembalian()
+{
+    $modelPeminjaman = new M_Peminjaman;
+    $modelBuku = new M_Buku;
+
+    $uri = service('uri');
+    $noPeminjaman = $uri->getSegment(3);
+
+    $dataPeminjaman = $modelPeminjaman->getDataPeminjaman([
+        'sha1(no_peminjaman)' => $noPeminjaman,
+        'status_transaksi' => "Berjalan"
+    ])->getRowArray();
+
+    if(!$dataPeminjaman){
+        session()->setFlashdata('error', 'Data peminjaman tidak ditemukan atau transaksi sudah selesai!');
+        return redirect()->to(base_url('admin/pengembalian-buku'));
+    }
+
+    $dataDetail = $modelPeminjaman->getDataDetailPeminjaman([
+        'sha1(no_peminjaman)' => $noPeminjaman
+    ])->getResultArray();
+
+    foreach($dataDetail as $detail){
+        $dataBuku = $modelBuku->getDataBuku([
+            'id_buku' => $detail['id_buku']
+        ])->getRowArray();
+
+        if($dataBuku){
+            $stok = $dataBuku['jumlah_eksemplar'] + 1;
+
+            $dataUpdateBuku = [
+                'jumlah_eksemplar' => $stok
+            ];
+
+            $modelBuku->updateDataBuku($dataUpdateBuku, [
+                'id_buku' => $detail['id_buku']
+            ]);
+        }
+
+        $dataUpdateDetail = [
+            'status_pinjam' => "Sudah Dikembalikan"
+        ];
+
+        $modelPeminjaman->updateDataDetail($dataUpdateDetail, [
+            'no_peminjaman' => $dataPeminjaman['no_peminjaman'],
+            'id_buku' => $detail['id_buku']
+        ]);
+    }
+
+    $dataUpdatePeminjaman = [
+        'status_transaksi' => "Selesai"
+    ];
+
+    $modelPeminjaman->updateDataPeminjaman($dataUpdatePeminjaman, [
+        'sha1(no_peminjaman)' => $noPeminjaman
+    ]);
+
+    session()->setFlashdata('success', 'Transaksi peminjaman berhasil diselesaikan!');
+    return redirect()->to(base_url('admin/pengembalian-buku'));
+    }
+
+    
 }
