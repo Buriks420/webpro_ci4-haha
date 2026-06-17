@@ -34,6 +34,13 @@
                 <?= $dataHeader['status_transaksi']; ?>
             </p>
 
+            <p>
+                <b>QR Code Peminjaman:</b><br>
+                <img src="<?= base_url('Assets/qr_code/qr_'.$dataHeader['no_peminjaman'].'.png'); ?>" 
+                     alt="QR Code Peminjaman" 
+                     style="max-width: 150px; border: 1px solid #ddd; padding: 5px; border-radius: 4px; margin-top: 10px;">
+            </p>
+
             <hr>
 
             <h3>Daftar Buku Dipinjam</h3>
