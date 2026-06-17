@@ -67,6 +67,9 @@ php_errors.log
 
 public/ci_session/*
 
+public/Assets/CoverBuku/*
+public/Assets/E-Book/*
+
 #-------------------------
 # User Guide Temp Files
 #-------------------------
